@@ -1384,7 +1384,7 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                                       }),
                                     });
                                     if (response.ok) {
-                                      await fetchConfig();
+                                      await refreshConfig();
                                       alert(
                                         newValue
                                           ? `已为用户 ${user.username} 关闭成人内容过滤`
