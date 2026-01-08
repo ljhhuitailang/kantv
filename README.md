@@ -99,23 +99,70 @@
 
 ## 🚀 部署
 
-本项目**仅支持 Docker 或其他基于 Docker 的平台** 部署。
+本项目支持多种部署方式，推荐使用 **Docker** 或 **Cloudflare Pages**。
 
-### 🧩 OpenWrt 部署
+### 方式一：Docker 部署（推荐）
 
-如果你计划运行在 OpenWrt（软路由 / ARM 盒子 / 树莓派等）设备上，参阅完整指南：
-
-👉 [OpenWrt 部署指南](./docs/OpenWrt部署指南.md)
-
-快速拉取预构建镜像：
+#### 快速开始（使用 docker-compose）
 
 ```bash
-docker pull ghcr.io/ljhhuitailang/kantv:latest
+# 1. 克隆项目
+git clone https://github.com/ljhhuitailang/kantv.git
+cd kantv
+
+# 2. 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，设置管理员账号和密码
+
+# 3. 启动服务
+docker-compose up -d
+
+# 4. 访问应用
+# 浏览器打开 http://localhost:3000
 ```
 
-若需在外部主机自行构建后再导入至 OpenWrt，请参考指南中的 “获取或构建镜像” 与 “导出并传输” 步骤。
+#### 使用预构建镜像
 
-### 📦 Docker 镜像标签
+KanTV 提供官方 Docker 镜像，支持 AMD64 和 ARM64 架构：
+
+```bash
+# 拉取最新版本
+docker pull ghcr.io/ljhhuitailang/kantv:latest
+
+# 或指定版本
+docker pull ghcr.io/ljhhuitailang/kantv:v1.2.0
+```
+
+### 方式二：Cloudflare Pages 部署
+
+支持使用 Cloudflare D1 数据库，全球 CDN 加速，免费额度充足。
+
+**优势**：
+- ✅ 免费部署，免运维
+- ✅ 全球 CDN 加速
+- ✅ D1 数据库免费额度：5GB 存储，10万次读取/天，5万次写入/天
+
+详细教程：[Cloudflare 部署指南](./CLOUDFLARE_DEPLOYMENT.md)
+
+### 🔧 OpenWrt / 软路由部署
+
+如果你想在 OpenWrt 设备（软路由、ARM 盒子、树莓派等）上部署：
+
+📖 [OpenWrt 完整部署指南](./docs/OpenWrt部署指南.md)
+
+---
+
+### 📦 Docker 存储方案
+
+KanTV 支持多种数据存储方案，根据你的需求选择：
+
+| 存储方案 | 适用场景 | 数据持久化 | 推荐度 |
+|---------|---------|-----------|--------|
+| **Kvrocks** | 生产环境、高可靠性 | ✅ 强持久化 | ⭐⭐⭐⭐⭐ |
+| **Redis** | 快速部署、测试环境 | ⚠️ 需配置持久化 | ⭐⭐⭐ |
+| **Upstash** | 无服务器、零运维 | ✅ 云端托管 | ⭐⭐⭐⭐ |
+| **Cloudflare D1** | Cloudflare Pages | ✅ 边缘数据库 | ⭐⭐⭐⭐⭐ |
+| **LocalStorage** | 开发测试、单用户 | ❌ 浏览器本地 | ⭐⭐ |
 
 KanTV 提供以下 Docker 镜像标签：
 
@@ -146,7 +193,11 @@ docker pull ghcr.io/ljhhuitailang/kantv:v1.1.0
 
 > **注意**：使用 `latest` 标签时，重启容器不会自动拉取新镜像，需要手动执行 `docker pull` 才能获取更新。使用版本号标签可以明确控制何时更新。
 
-### Kvrocks 存储（推荐）
+---
+
+### 📋 Docker Compose 配置示例
+
+#### Kvrocks 存储（推荐用于生产）
 
 ```yml
 services:
@@ -180,7 +231,7 @@ volumes:
   kvrocks-data:
 ```
 
-### Redis 存储（有一定的丢数据风险）
+#### Redis 存储（快速部署）
 
 ```yml
 services:
@@ -213,7 +264,7 @@ networks:
     driver: bridge
 ```
 
-### Upstash 存储
+#### Upstash 存储（无服务器）
 
 1. 在 [upstash](https://upstash.com/) 注册账号并新建一个 Redis 实例，名称任意。
 2. 复制新数据库的 **HTTPS ENDPOINT 和 TOKEN**
