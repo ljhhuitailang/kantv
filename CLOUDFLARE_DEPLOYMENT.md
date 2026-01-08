@@ -72,8 +72,8 @@ git push -u origin main
 | **Project name** | `kantv` | 项目名称，将用于生成 URL |
 | **Production branch** | `main` | 生产环境分支 |
 | **Framework preset** | `Next.js` | 选择 Next.js 框架 |
-| **Build command** | `npm run build` | 构建命令 |
-| **Build output directory** | `.next` | 构建输出目录 |
+| **Build command** | `npm run pages:build` | Cloudflare Pages 专用构建命令 |
+| **Build output directory** | `.vercel/output/static` | 构建输出目录 |
 
 #### 3.2 环境变量设置
 
@@ -95,7 +95,7 @@ git push -u origin main
 | `NEXT_PUBLIC_ENABLE_REGISTRATION` | `false` | 是否开放注册（默认关闭） |
 | `NEXT_PUBLIC_SEARCH_MAX_PAGE` | `5` | 搜索最大页数 |
 | `NEXT_PUBLIC_FLUID_SEARCH` | `true` | 流式搜索 |
-| `NEXT_PUBLIC_DISABLE_YELLOW_FILTER` | `false` | 成人内容过滤（false=启用过滤） |
+| `DISABLE_YELLOW_FILTER` | `false` | 成人内容过滤（false=启用过滤，true=允许成人内容） |
 
 > **安全提示**：设置强密码，不要公开分享你的管理员账号。
 
@@ -286,9 +286,22 @@ wrangler d1 export kantv-db --output=backup.sql
 
 **解决方法**：
 1. 检查 `package.json` 文件是否完整
-2. 确保所有必要文件都已推送到 GitHub
-3. 在构建日志中查找具体缺少的模块
-4. 本地测试构建：`npm install && npm run build`
+2. 确保 `@cloudflare/next-on-pages` 依赖已添加
+3. 确保所有必要文件都已推送到 GitHub
+4. 在构建日志中查找具体缺少的模块
+5. 本地测试构建：`npm install && npm run pages:build`
+
+### 问题 1.5: 构建失败 - "Output directory not found"
+
+**错误信息**：`Output directory ".vercel/output/static" not found.`
+
+**可能原因**：构建命令错误，未使用 Cloudflare Pages 专用构建命令
+
+**解决方法**：
+1. 确保 Build command 设置为 `npm run pages:build`（不是 `npm run build`）
+2. 检查 `package.json` 中是否有 `pages:build` 脚本
+3. 确保 `@cloudflare/next-on-pages` 依赖已安装
+4. 重新部署应用
 
 ### 问题 2: 运行时错误 - "DB is not defined"
 
@@ -315,9 +328,10 @@ wrangler d1 export kantv-db --output=backup.sql
 **可能原因**：环境变量设置问题
 
 **解决方法**：
-1. 不要通过环境变量 `NEXT_PUBLIC_DISABLE_YELLOW_FILTER` 控制
-2. 登录管理后台 > 站点设置，使用网页端控制
-3. 参考 [成人内容过滤配置说明](./docs/成人内容过滤配置说明.md)
+1. 通过环境变量 `DISABLE_YELLOW_FILTER` 设置全局默认行为（部署时设置）
+2. 登录管理后台 > 站点设置，可以随时修改全局设置（无需重建）
+3. 在管理后台 > 用户管理，可以为每个用户单独配置过滤权限
+4. 参考 [成人内容过滤配置说明](./docs/成人内容过滤配置说明.md)
 
 ### 问题 5: pnpm install 失败（CLI 部署）
 

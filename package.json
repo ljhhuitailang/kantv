@@ -19,6 +19,9 @@
     "postbuild": "echo 'Build completed - sitemap generation disabled'",
     "prepare": "husky install",
     "vercel-build": "pnpm gen:manifest && pnpm copy:version && next build",
+    "pages:build": "pnpm gen:manifest && pnpm copy:version && npx @cloudflare/next-on-pages",
+    "pages:preview": "pnpm pages:build && wrangler pages dev",
+    "pages:deploy": "pnpm pages:build && wrangler pages deploy",
     "docker:build": "docker build -t kantv .",
     "docker:run": "docker run -p 3000:3000 kantv"
   },
@@ -57,6 +60,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1",
     "@commitlint/cli": "^16.3.0",
     "@commitlint/config-conventional": "^16.2.4",
     "@eslint/eslintrc": "^3.3.1",

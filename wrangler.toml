@@ -7,6 +7,11 @@ compatibility_date = "2024-01-01"
 # Pages 配置
 pages_build_output_dir = ".vercel/output/static"
 
+# 注意：Cloudflare Pages 会自动从 wrangler.toml 读取配置
+# 如果使用 Git 集成部署（推荐），请在 Cloudflare Dashboard 中设置：
+# - Build command: npm run pages:build
+# - Build output directory: .vercel/output/static
+
 # D1 数据库绑定
 [[d1_databases]]
 binding = "DB"  # 在代码中通过 env.DB 访问
@@ -18,5 +23,7 @@ database_id = ""  # 创建 D1 数据库后填入，格式: "xxxxxxxx-xxxx-xxxx-x
 # NEXT_PUBLIC_STORAGE_TYPE = "d1"
 # NEXT_PUBLIC_SITE_NAME = "KanTV"
 # NEXT_PUBLIC_ENABLE_REGISTRATION = "true"
+# DISABLE_YELLOW_FILTER = "false"
 
 # 注意：敏感信息（如 USERNAME、PASSWORD）应在 Cloudflare Dashboard 中设置为 Secrets
+
