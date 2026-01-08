@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthInfoFromCookie } from '@/lib/auth';
-import { getConfig, getLocalModeConfig } from '@/lib/config';
+import { getConfig, getLocalModeConfig, setCachedConfig } from '@/lib/config';
 import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
@@ -137,6 +137,9 @@ export async function POST(request: NextRequest) {
 
     // 写入数据库
     await db.saveAdminConfig(adminConfig);
+
+    // 🔥 关键修复：更新内存缓存，让设置立即生效
+    await setCachedConfig(adminConfig);
 
     return NextResponse.json(
       { ok: true },
