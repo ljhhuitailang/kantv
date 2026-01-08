@@ -1,199 +1,412 @@
-# Cloudflare Pages + D1 部署指南
+# KanTV Cloudflare Pages 部署指南
 
-本指南将帮助你将 KanTV 部署到 Cloudflare Pages，并使用 D1 数据库存储数据。
+本指南将帮助你通过 **Cloudflare Dashboard 网页端**将 KanTV 部署到 Cloudflare Pages，并使用 D1 数据库存储数据。
 
-## 前置要求
+## 🎯 为什么选择 Cloudflare Pages？
 
-1. Cloudflare 账号
-2. 安装 Wrangler CLI: `npm install -g wrangler`
-3. 登录 Cloudflare: `wrangler login`
+- ✅ **完全免费**：免费套餐提供 500 次构建/月，无限请求
+- ✅ **全球 CDN 加速**：自动分发到全球 300+ 数据中心
+- ✅ **D1 数据库**：边缘数据库，5GB 免费存储
+- ✅ **自动部署**：Git 推送后自动构建和部署
+- ✅ **零运维**：无需管理服务器
 
-## 步骤 1: 创建 D1 数据库
+---
+
+## 📋 前置要求
+
+1. **Cloudflare 账号**：[注册地址](https://dash.cloudflare.com/sign-up)
+2. **GitHub 账号**：代码需要托管在 GitHub（或 GitLab）
+3. **KanTV 代码仓库**：Fork 或克隆到你的 GitHub 账号
+
+---
+
+## 🚀 部署步骤
+
+### 步骤 1: 准备代码仓库
+
+确保你的 KanTV 代码已经推送到 GitHub 仓库。如果还没有：
 
 ```bash
-# 创建 D1 数据库
-wrangler d1 create kantv-db
+# 克隆项目
+git clone https://github.com/ljhhuitailang/kantv.git
+cd kantv
 
-# 命令会返回数据库 ID，类似:
-# ✅ Successfully created DB 'kantv-db'
-#
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "kantv-db"
-# database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+# 推送到你的 GitHub 仓库
+git remote set-url origin https://github.com/你的用户名/kantv.git
+git push -u origin main
 ```
 
-**重要**: 将返回的 `database_id` 复制并填入 `wrangler.toml` 文件中。
+---
 
-## 步骤 2: 初始化数据库表结构
+### 步骤 2: 创建 Cloudflare Pages 项目
 
-D1 数据库会在首次使用时自动创建表结构，无需手动初始化。
+#### 2.1 登录 Cloudflare Dashboard
 
-如果需要手动初始化，可以创建 SQL 文件并执行：
+1. 访问 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 登录你的账号
+3. 在左侧导航栏找到 **Workers & Pages**
+
+#### 2.2 创建 Pages 项目
+
+1. 点击 **Create application** 按钮
+2. 选择 **Pages** 标签页
+3. 点击 **Connect to Git** 按钮
+
+#### 2.3 连接 GitHub 仓库
+
+1. 选择 **GitHub** 作为 Git 提供商
+2. 授权 Cloudflare 访问你的 GitHub 账号
+3. 选择 **kantv** 仓库（或你 fork 的仓库名）
+4. 点击 **Begin setup**
+
+---
+
+### 步骤 3: 配置构建设置
+
+#### 3.1 项目设置
+
+在 "Set up builds and deployments" 页面，填写以下信息：
+
+| 配置项 | 值 | 说明 |
+|--------|-----|------|
+| **Project name** | `kantv` | 项目名称，将用于生成 URL |
+| **Production branch** | `main` | 生产环境分支 |
+| **Framework preset** | `Next.js` | 选择 Next.js 框架 |
+| **Build command** | `npm run build` | 构建命令 |
+| **Build output directory** | `.next` | 构建输出目录 |
+
+#### 3.2 环境变量设置
+
+点击 **Environment variables (advanced)** 展开环境变量配置，添加以下变量：
+
+**必填变量**：
+
+| 变量名 | 值 | 说明 |
+|--------|-----|------|
+| `USERNAME` | `admin` | 管理员用户名 |
+| `PASSWORD` | `你的密码` | 管理员密码（建议使用复杂密码） |
+| `NEXT_PUBLIC_STORAGE_TYPE` | `d1` | 存储类型（使用 D1 数据库） |
+
+**推荐添加的变量**：
+
+| 变量名 | 值 | 说明 |
+|--------|-----|------|
+| `NEXT_PUBLIC_SITE_NAME` | `KanTV` | 站点名称 |
+| `NEXT_PUBLIC_ENABLE_REGISTRATION` | `false` | 是否开放注册（默认关闭） |
+| `NEXT_PUBLIC_SEARCH_MAX_PAGE` | `5` | 搜索最大页数 |
+| `NEXT_PUBLIC_FLUID_SEARCH` | `true` | 流式搜索 |
+| `NEXT_PUBLIC_DISABLE_YELLOW_FILTER` | `false` | 成人内容过滤（false=启用过滤） |
+
+> **安全提示**：设置强密码，不要公开分享你的管理员账号。
+
+#### 3.3 Node.js 版本设置
+
+确保使用 Node.js 20 或更高版本。如果默认版本不对，添加环境变量：
+
+| 变量名 | 值 |
+|--------|-----|
+| `NODE_VERSION` | `20` |
+
+#### 3.4 完成初始部署
+
+1. 检查所有配置是否正确
+2. 点击 **Save and Deploy** 按钮
+3. 等待构建完成（大约 3-5 分钟）
+
+> **注意**：首次部署可能会失败，因为还没有配置 D1 数据库。这是正常的，继续下一步。
+
+---
+
+### 步骤 4: 创建和绑定 D1 数据库
+
+#### 4.1 创建 D1 数据库
+
+1. 在 Cloudflare Dashboard 左侧导航栏，找到 **Workers & Pages**
+2. 点击顶部的 **D1 SQL Database** 标签
+3. 点击 **Create** 按钮
+4. 输入数据库名称：`kantv-db`
+5. 点击 **Create** 按钮
+
+#### 4.2 绑定 D1 数据库到 Pages 项目
+
+1. 返回 **Workers & Pages**，找到你的 `kantv` 项目
+2. 点击项目名称进入项目详情页
+3. 点击顶部的 **Settings** 标签
+4. 在左侧找到 **Functions** 选项
+5. 滚动到 **D1 database bindings** 部分
+6. 点击 **Add binding** 按钮
+
+添加绑定信息：
+
+| 配置项 | 值 |
+|--------|-----|
+| **Variable name** | `DB` |
+| **D1 database** | `kantv-db`（选择刚创建的数据库） |
+
+7. 点击 **Save** 按钮
+
+---
+
+### 步骤 5: 重新部署
+
+由于添加了 D1 数据库绑定，需要重新部署：
+
+1. 在项目详情页，点击顶部的 **Deployments** 标签
+2. 找到最新的部署记录
+3. 点击右侧的 **⋮** 菜单
+4. 选择 **Retry deployment**
+
+或者，推送一个新的 commit 到 GitHub 仓库，触发自动部署：
 
 ```bash
-# 创建初始化脚本 schema.sql（可选）
-wrangler d1 execute decotv-db --file=./schema.sql
+git commit --allow-empty -m "Trigger Cloudflare Pages deployment"
+git push
 ```
 
-## 步骤 3: 配置环境变量
+---
 
-### 3.1 更新 wrangler.toml
+### 步骤 6: 验证部署
 
-确保 `wrangler.toml` 中的 `database_id` 已正确填写。
+#### 6.1 访问应用
 
-### 3.2 在 Cloudflare Dashboard 设置 Secrets
+1. 部署成功后，在项目详情页会显示 URL
+2. 默认 URL 格式：`https://kantv.pages.dev`
+3. 点击 URL 访问你的 KanTV 应用
 
-前往 Cloudflare Dashboard > Pages > 你的项目 > Settings > Environment variables
+#### 6.2 登录管理后台
 
-添加以下环境变量：
+1. 访问 `https://你的域名.pages.dev/admin`
+2. 使用你设置的 `USERNAME` 和 `PASSWORD` 登录
+3. 进入 **站点设置** 和 **配置文件设置** 配置你的影视资源源
 
-**必填变量：**
-- `USERNAME` (Secret): 管理员用户名
-- `PASSWORD` (Secret): 管理员密码
-- `NEXT_PUBLIC_STORAGE_TYPE`: `d1`
+---
 
-**可选变量：**
-- `NEXT_PUBLIC_SITE_NAME`: 站点名称（默认: KanTV）
-- `NEXT_PUBLIC_ENABLE_REGISTRATION`: 是否启用用户注册（true/false）
-- `NEXT_PUBLIC_SEARCH_MAX_PAGE`: 搜索最大页数（默认: 5）
-- `NEXT_PUBLIC_DISABLE_YELLOW_FILTER`: 是否禁用成人内容过滤（true/false）
-- `NEXT_PUBLIC_FLUID_SEARCH`: 是否启用流式搜索（true/false）
+## 🌐 配置自定义域名（可选）
 
-## 步骤 4: 部署到 Cloudflare Pages
+### 步骤 1: 添加域名
 
-### 方法 1: 通过 Git 自动部署（推荐）
+1. 在项目详情页，点击顶部的 **Custom domains** 标签
+2. 点击 **Set up a custom domain** 按钮
+3. 输入你的域名（例如：`kantv.example.com`）
+4. 点击 **Continue**
 
-1. 将代码推送到 GitHub/GitLab
-2. 在 Cloudflare Dashboard 创建 Pages 项目
-3. 连接你的 Git 仓库
-4. 配置构建设置：
-   - **Framework preset**: Next.js
-   - **Build command**: `pnpm build` 或 `npm run build`
-   - **Build output directory**: `.next`
-   - **Node version**: 20
+### 步骤 2: 配置 DNS
 
-5. 在 Settings > Functions 中绑定 D1 数据库：
-   - Variable name: `DB`
-   - D1 database: 选择你创建的 `kantv-db`
+Cloudflare 会自动检测你的域名是否托管在 Cloudflare。
 
-6. 点击 "Save and Deploy"
+**如果域名在 Cloudflare**：
+- 会自动添加 DNS 记录
+- 无需手动操作
 
-### 方法 2: 使用 Wrangler CLI 部署
+**如果域名不在 Cloudflare**：
+- 需要在你的域名提供商添加 CNAME 记录
+- 记录值：`kantv.pages.dev`
 
-```bash
-# 构建项目
-pnpm build
+### 步骤 3: 等待生效
 
-# 部署到 Cloudflare Pages
-wrangler pages deploy .next --project-name=kantv
+- DNS 记录生效通常需要几分钟到几小时
+- 可以使用 `dig` 或 `nslookup` 检查 DNS 是否生效
 
-# 绑定 D1 数据库
-wrangler pages deployment create --project-name=kantv --branch=main --binding DB=kantv-db
+---
+
+## 🔧 高级配置
+
+### 管理环境变量
+
+修改环境变量后，需要重新部署才能生效。
+
+1. 进入项目详情页 > **Settings** > **Environment variables**
+2. 可以为不同环境（Production / Preview）设置不同的变量
+3. 修改后点击 **Save**
+4. 重新部署应用
+
+### 查看构建日志
+
+如果部署失败，可以查看构建日志：
+
+1. 进入项目详情页 > **Deployments**
+2. 点击失败的部署记录
+3. 点击 **View build log** 查看详细错误信息
+
+### 回滚部署
+
+如果新版本有问题，可以快速回滚：
+
+1. 进入项目详情页 > **Deployments**
+2. 找到之前成功的部署记录
+3. 点击 **⋮** > **Rollback to this deployment**
+
+---
+
+## 🗄️ D1 数据库管理
+
+### 通过 Dashboard 查看数据
+
+1. 进入 **Workers & Pages** > **D1 SQL Database**
+2. 点击 `kantv-db` 数据库
+3. 点击 **Console** 标签
+4. 可以执行 SQL 查询：
+
+```sql
+-- 查看所有表
+SELECT name FROM sqlite_master WHERE type='table';
+
+-- 查看用户列表
+SELECT * FROM admin_config;
 ```
 
-## 步骤 5: 配置自定义域名（可选）
+### 使用 Wrangler CLI 管理数据库
 
-1. 前往 Cloudflare Dashboard > Pages > 你的项目 > Custom domains
-2. 添加你的域名
-3. 按照提示配置 DNS 记录
-
-## 本地开发
-
-使用 Cloudflare Pages 本地开发环境：
+如果你需要更高级的数据库操作，可以安装 Wrangler CLI：
 
 ```bash
-# 1. 创建 .dev.vars 文件（从 .dev.vars.example 复制）
-cp .dev.vars.example .dev.vars
+# 安装 Wrangler
+npm install -g wrangler
 
-# 2. 编辑 .dev.vars，填入你的配置
+# 登录
+wrangler login
 
-# 3. 使用 Wrangler 启动本地开发服务器
-wrangler pages dev -- pnpm dev
+# 查看数据库信息
+wrangler d1 info kantv-db
 
-# 或者使用标准 Next.js 开发服务器（不支持 D1，需使用其他存储）
-pnpm dev
-```
-
-## 数据库管理
-
-### 查看数据库信息
-
-```bash
-wrangler d1 info decotv-db
-```
-
-### 执行 SQL 查询
-
-```bash
-# 查看所有表
-wrangler d1 execute decotv-db --command="SELECT name FROM sqlite_master WHERE type='table'"
-
-# 查看用户列表
-wrangler d1 execute decotv-db --command="SELECT username FROM users"
+# 执行 SQL
+wrangler d1 execute kantv-db --command="SELECT * FROM admin_config"
 
 # 导出数据
-wrangler d1 export decotv-db --output=backup.sql
+wrangler d1 export kantv-db --output=backup.sql
 ```
 
-### 数据备份与恢复
+---
 
-```bash
-# 备份数据库
-wrangler d1 export decotv-db --output=backup.sql
+## 🐛 故障排查
 
-# 恢复数据库
-wrangler d1 execute decotv-db --file=backup.sql
+### 问题 1: 构建失败 - "Module not found"
+
+**可能原因**：依赖安装失败或缺少文件
+
+**解决方法**：
+1. 检查 `package.json` 文件是否完整
+2. 确保所有必要文件都已推送到 GitHub
+3. 在构建日志中查找具体缺少的模块
+4. 本地测试构建：`npm install && npm run build`
+
+### 问题 2: 运行时错误 - "DB is not defined"
+
+**可能原因**：D1 数据库未正确绑定
+
+**解决方法**：
+1. 检查 Settings > Functions > D1 database bindings
+2. 确保 Variable name 是 `DB`（大写）
+3. 确保选择了正确的数据库 `kantv-db`
+4. 重新部署应用
+
+### 问题 3: 部署成功但无法访问
+
+**可能原因**：环境变量未设置或设置错误
+
+**解决方法**：
+1. 检查 Settings > Environment variables
+2. 确保 `NEXT_PUBLIC_STORAGE_TYPE=d1` 已设置
+3. 确保 `USERNAME` 和 `PASSWORD` 已设置
+4. 检查浏览器控制台是否有 JavaScript 错误
+
+### 问题 4: 成人内容过滤不生效
+
+**可能原因**：环境变量设置问题
+
+**解决方法**：
+1. 不要通过环境变量 `NEXT_PUBLIC_DISABLE_YELLOW_FILTER` 控制
+2. 登录管理后台 > 站点设置，使用网页端控制
+3. 参考 [成人内容过滤配置说明](./docs/成人内容过滤配置说明.md)
+
+### 问题 5: pnpm install 失败（CLI 部署）
+
+**错误信息**：`Exited with error code: 254`
+
+**解决方法**：
+- **不要使用 CLI 部署**，改用本指南推荐的网页端部署方式
+- Cloudflare Pages 的 Git 集成部署更稳定
+- 如果必须使用 CLI，尝试使用 npm 而不是 pnpm
+
+---
+
+## 📊 性能优化建议
+
+### 1. 启用缓存策略
+
+Cloudflare Pages 自动缓存静态资源，但你可以优化动态内容：
+
+- 在 API 响应中添加 `Cache-Control` 头
+- 使用 Cloudflare Cache API 缓存频繁访问的数据
+
+### 2. 优化 D1 查询
+
+```typescript
+// ✅ 好的实践：使用索引
+await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
+
+// ❌ 避免：全表扫描
+await db.prepare('SELECT * FROM users').all();
+
+// ✅ 批量操作使用 batch
+await db.batch([
+  db.prepare('INSERT INTO ...').bind(...),
+  db.prepare('INSERT INTO ...').bind(...),
+]);
 ```
 
-## 故障排查
+### 3. 使用 Cloudflare 图片优化
 
-### D1 数据库连接失败
+如果你的应用有大量图片，考虑使用 Cloudflare Images：
 
-1. 检查 `wrangler.toml` 中的 `database_id` 是否正确
-2. 确保在 Cloudflare Dashboard 中正确绑定了 D1 数据库
-3. 检查环境变量 `NEXT_PUBLIC_STORAGE_TYPE` 是否设置为 `d1`
+```typescript
+// 图片 URL 添加 Cloudflare 优化参数
+const optimizedUrl = `${imageUrl}?width=800&format=auto`;
+```
 
-### 表不存在错误
+---
 
-D1 数据库会在首次使用时自动创建表结构。如果遇到表不存在的错误：
+## 💰 费用说明
 
-1. 检查应用日志，确认初始化是否成功
-2. 手动执行初始化脚本（如果有）
+### Cloudflare Pages（免费套餐）
 
-### 构建失败
+- ✅ 500 次构建/月
+- ✅ 无限请求
+- ✅ 无限带宽
+- ✅ 1 个并发构建
 
-1. 确保 Node.js 版本为 20 或更高
-2. 检查依赖是否正确安装：`pnpm install`
-3. 本地测试构建：`pnpm build`
+### D1 数据库（免费套餐）
 
-## 性能优化
+- ✅ 5GB 存储空间
+- ✅ 100,000 次读取/天（5,000,000/月）
+- ✅ 50,000 次写入/天（1,500,000/月）
 
-1. **启用缓存**: Cloudflare Pages 自动缓存静态资源
-2. **使用 CDN**: Cloudflare 全球 CDN 加速内容分发
-3. **D1 查询优化**:
-   - 使用索引加速查询
-   - 批量操作使用 `batch()` 方法
-   - 避免频繁的小查询
+> **提示**：对于个人使用或小型站点，免费套餐完全够用！
 
-## 费用说明
+详细定价：[Cloudflare Pages 定价](https://developers.cloudflare.com/pages/platform/limits/)
 
-- **Cloudflare Pages**: 免费套餐提供 500 次构建/月，无限请求
-- **D1 数据库**:
-  - 免费套餐: 5GB 存储，100,000 次读取/天，50,000 次写入/天
-  - 超出部分按使用量计费
+---
 
-详细定价: https://developers.cloudflare.com/pages/pricing/
+## 📚 相关文档
 
-## 相关文档
-
-- [Cloudflare Pages 文档](https://developers.cloudflare.com/pages/)
+- [Cloudflare Pages 官方文档](https://developers.cloudflare.com/pages/)
 - [D1 数据库文档](https://developers.cloudflare.com/d1/)
 - [Next.js on Cloudflare Pages](https://developers.cloudflare.com/pages/framework-guides/nextjs/)
-- [Wrangler CLI 文档](https://developers.cloudflare.com/workers/wrangler/)
+- [成人内容过滤配置说明](./docs/成人内容过滤配置说明.md)
+- [用户注册功能说明](./docs/用户注册功能说明.md)
 
-## 需要帮助？
+---
 
-如果遇到问题，请访问：
-- [项目 GitHub Issues](https://github.com/your-repo/issues)
-- [Cloudflare 社区论坛](https://community.cloudflare.com/)
+## 🆘 获取帮助
+
+如果遇到问题：
+
+1. 📖 查看本文档的故障排查部分
+2. 🐛 提交 Issue：[GitHub Issues](https://github.com/ljhhuitailang/kantv/issues)
+3. 💬 加入讨论：[GitHub Discussions](https://github.com/ljhhuitailang/kantv/discussions)
+4. 📚 查看 Cloudflare 社区：[Cloudflare Community](https://community.cloudflare.com/)
+
+---
+
+**最后更新**：2026-01-08
+**适用版本**：KanTV v1.2.0+
