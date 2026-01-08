@@ -525,12 +525,10 @@ export async function POST(request: NextRequest) {
         const { disableAdultFilter } = body as { disableAdultFilter: boolean };
 
         // 更新用户的成人内容过滤设置
-        if (disableAdultFilter) {
-          targetEntry.disableAdultFilter = true; // 禁用过滤（允许查看成人内容）
-        } else {
-          // 如果为 false，则删除该字段，使用全局设置
-          delete targetEntry.disableAdultFilter;
-        }
+        // 明确设置用户的权限，不依赖全局设置
+        // disableAdultFilter = true: 允许该用户查看成人内容（禁用过滤）
+        // disableAdultFilter = false: 禁止该用户查看成人内容（启用过滤）
+        targetEntry.disableAdultFilter = disableAdultFilter;
 
         break;
       }

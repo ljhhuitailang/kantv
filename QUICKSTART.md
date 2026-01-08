@@ -1,4 +1,4 @@
-# DecoTV 功能改进 - 快速入门
+# KanTV 功能改进 - 快速入门
 
 本次更新添加了三项重要功能，下面是快速使用指南。
 
@@ -7,7 +7,7 @@
 ### 快速部署步骤
 ```bash
 # 1. 创建 D1 数据库
-wrangler d1 create decotv-db
+wrangler d1 create kantv-db
 
 # 2. 复制返回的 database_id，填入 wrangler.toml
 

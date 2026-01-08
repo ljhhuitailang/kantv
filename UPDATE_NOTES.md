@@ -1,4 +1,4 @@
-# DecoTV 更新说明 - v1.2.0
+# KanTV 更新说明 - v1.2.0
 
 本次更新增加了三项重要功能改进：
 
@@ -14,7 +14,7 @@
 详细部署步骤请参考：[CLOUDFLARE_DEPLOYMENT.md](./CLOUDFLARE_DEPLOYMENT.md)
 
 ### 配置方法
-1. 创建 D1 数据库：`wrangler d1 create decotv-db`
+1. 创建 D1 数据库：`wrangler d1 create kantv-db`
 2. 更新 `wrangler.toml` 中的 `database_id`
 3. 设置环境变量：`NEXT_PUBLIC_STORAGE_TYPE=d1`
 4. 在 Cloudflare Dashboard 绑定 D1 数据库
@@ -90,7 +90,7 @@
 ```bash
 # 1. 克隆项目
 git clone <your-repo-url>
-cd decotv
+cd kantv
 
 # 2. 创建环境变量文件
 cp .env.example .env

@@ -1,11 +1,11 @@
 <!-- markdownlint-disable MD033 MD026 MD034 -->
 
-# DecoTV
+# KanTV
 
-<div align="center"src="public/logo.png" alt="DecoTV Logo" width="120">
+<div align="center"src="public/logo.png" alt="KanTV Logo" width="120">
 </div>
 
-> 🎬 **DecoTV** 是一个开箱即用的、跨平台的影视聚合播放器。它基于 **Next.js 16** + **Tailwind&nbsp;CSS 4** + **TypeScript 5** 构建，支持多资源搜索、在线播放、收藏同步、播放记录、云端存储，让你可以随时随地畅享海量免费影视内容。**支持本地无数据库模式、CMS 全量代理、隐私纵深防御等企业级特性。**
+> 🎬 **KanTV** 是一个开箱即用的、跨平台的影视聚合播放器。它基于 **Next.js 16** + **Tailwind&nbsp;CSS 4** + **TypeScript 5** 构建，支持多资源搜索、在线播放、收藏同步、播放记录、云端存储，让你可以随时随地畅享海量免费影视内容。**支持 Cloudflare D1、用户级别成人内容过滤、Docker 一键部署等企业级特性。**
 
 <div align="center">
 
@@ -110,31 +110,31 @@
 快速拉取预构建镜像：
 
 ```bash
-docker pull ghcr.io/decohererk/decotv:latest
+docker pull ghcr.io/ljhhuitailang/kantv:latest
 ```
 
 若需在外部主机自行构建后再导入至 OpenWrt，请参考指南中的 “获取或构建镜像” 与 “导出并传输” 步骤。
 
 ### 📦 Docker 镜像标签
 
-DecoTV 提供以下 Docker 镜像标签：
+KanTV 提供以下 Docker 镜像标签：
 
 | 标签     | 说明         | 使用场景                         |
 | -------- | ------------ | -------------------------------- |
 | `latest` | 最新构建版本 | 总是使用最新代码，包含所有小更新 |
-| `v1.0.0` | 特定版本号   | 固定版本部署，便于版本管理和回滚 |
+| `v1.2.0` | 特定版本号   | 固定版本部署，便于版本管理和回滚 |
 
 **推荐使用方式**：
 
 ```bash
 # 方式1：使用 latest 标签（自动获取最新更新）
-docker pull ghcr.io/decohererk/decotv:latest
+docker pull ghcr.io/ljhhuitailang/kantv:latest
 
 # 方式2：使用特定版本号（生产环境推荐）
-docker pull ghcr.io/decohererk/decotv:v1.0.0
+docker pull ghcr.io/ljhhuitailang/kantv:v1.2.0
 
 # 方式3：回滚到旧版本
-docker pull ghcr.io/decohererk/decotv:v0.9.0
+docker pull ghcr.io/ljhhuitailang/kantv:v1.1.0
 ```
 
 **版本号标签优势**：
@@ -150,9 +150,9 @@ docker pull ghcr.io/decohererk/decotv:v0.9.0
 
 ```yml
 services:
-  decotv-core:
-    image: ghcr.io/decohererk/decotv:latest # 或使用 :v1.0.0 固定版本
-    container_name: decotv-core
+  kantv-core:
+    image: ghcr.io/ljhhuitailang/kantv:latest # 或使用 :v1.2.0 固定版本
+    container_name: kantv-core
     restart: on-failure
     ports:
       - '3000:3000'
@@ -160,21 +160,21 @@ services:
       - USERNAME=admin
       - PASSWORD=admin_password
       - NEXT_PUBLIC_STORAGE_TYPE=kvrocks
-      - KVROCKS_URL=redis://decotv-kvrocks:6666
+      - KVROCKS_URL=redis://kantv-kvrocks:6666
     networks:
-      - decotv-network
+      - kantv-network
     depends_on:
-      - decotv-kvrocks
-  decotv-kvrocks:
+      - kantv-kvrocks
+  kantv-kvrocks:
     image: apache/kvrocks
-    container_name: decotv-kvrocks
+    container_name: kantv-kvrocks
     restart: unless-stopped
     volumes:
       - kvrocks-data:/var/lib/kvrocks
     networks:
-      - decotv-network
+      - kantv-network
 networks:
-  decotv-network:
+  kantv-network:
     driver: bridge
 volumes:
   kvrocks-data:
@@ -184,9 +184,9 @@ volumes:
 
 ```yml
 services:
-  decotv-core:
-    image: ghcr.io/decohererk/decotv:latest # 或使用 :v1.0.0 固定版本
-    container_name: decotv-core
+  kantv-core:
+    image: ghcr.io/ljhhuitailang/kantv:latest # 或使用 :v1.2.0 固定版本
+    container_name: kantv-core
     restart: on-failure
     ports:
       - '3000:3000'
@@ -194,22 +194,22 @@ services:
       - USERNAME=admin
       - PASSWORD=admin_password
       - NEXT_PUBLIC_STORAGE_TYPE=redis
-      - REDIS_URL=redis://decotv-redis:6379
+      - REDIS_URL=redis://kantv-redis:6379
     networks:
-      - decotv-network
+      - kantv-network
     depends_on:
-      - decotv-redis
-  decotv-redis:
+      - kantv-redis
+  kantv-redis:
     image: redis:alpine
-    container_name: decotv-redis
+    container_name: kantv-redis
     restart: unless-stopped
     networks:
-      - decotv-network
+      - kantv-network
     # 请开启持久化，否则升级/重启后数据丢失
     volumes:
       - ./data:/data
 networks:
-  decotv-network:
+  kantv-network:
     driver: bridge
 ```
 
@@ -221,9 +221,9 @@ networks:
 
 ```yml
 services:
-  decotv-core:
-    image: ghcr.io/decohererk/decotv:latest # 或使用 :v1.0.0 固定版本
-    container_name: decotv-core
+  kantv-core:
+    image: ghcr.io/ljhhuitailang/kantv:latest # 或使用 :v1.2.0 固定版本
+    container_name: kantv-core
     restart: on-failure
     ports:
       - '3000:3000'
@@ -280,7 +280,7 @@ custom_category 支持的自定义分类已知如下：
 
 也可输入如 "哈利波特" 效果等同于豆瓣搜索
 
-DecoTV 支持标准的苹果 CMS V10 API 格式。
+KanTV 支持标准的苹果 CMS V10 API 格式。
 
 ## 🔄 自动更新
 
@@ -297,20 +297,22 @@ dockge/komodo 等 docker compose UI 也有自动更新功能
 | USERNAME              | 管理员账号 | 任意字符串               | 无默认，**必填**                                                                                                           |
 | PASSWORD              | 管理员密码 | 任意字符串               | 无默认，**必填**                                                                                                           |
 | SITE_BASE             | 站点 URL   | 形如 https://example.com | 空                                                                                                                         |
-| NEXT_PUBLIC_SITE_NAME | 站点名称   | 任意字符串               | DecoTV                                                                                                                     |
+| NEXT_PUBLIC_SITE_NAME | 站点名称   | 任意字符串               | KanTV                                                                                                                      |
 | ANNOUNCEMENT          | 站点公告   | 任意字符串               | 本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。 |
 
 ### 存储配置
 
-| 变量                     | 说明                    | 可选值                  | 默认值           | 备注                           |
-| ------------------------ | ----------------------- | ----------------------- | ---------------- | ------------------------------ |
-| NEXT_PUBLIC_STORAGE_TYPE | 存储类型                | redis、kvrocks、upstash | 无默认，**必填** | 三选一，推荐使用 kvrocks       |
+| 变量                     | 说明                    | 可选值                          | 默认值           | 备注                           |
+| ------------------------ | ----------------------- | ------------------------------- | ---------------- | ------------------------------ |
+| NEXT_PUBLIC_STORAGE_TYPE | 存储类型                | redis、kvrocks、upstash、d1     | 无默认，**必填** | 推荐 kvrocks 或 d1             |
 | KVROCKS_URL              | Kvrocks 数据库连接地址  | redis://host:port       | 空               | 当 STORAGE_TYPE=kvrocks 时必填 |
 | REDIS_URL                | Redis 数据库连接地址    | redis://host:port       | 空               | 当 STORAGE_TYPE=redis 时必填   |
 | UPSTASH_URL              | Upstash Redis REST URL  | https://xxx.upstash.io  | 空               | 当 STORAGE_TYPE=upstash 时必填 |
 | UPSTASH_TOKEN            | Upstash Redis REST 令牌 | AUxxxx...               | 空               | 当 STORAGE_TYPE=upstash 时必填 |
 
-> **注意**：Upstash 使用 REST API 连接，需要填写 `UPSTASH_URL`（HTTPS ENDPOINT）和 `UPSTASH_TOKEN`，不是传统的 Redis 连接字符串。
+> **注意**：
+> - Upstash 使用 REST API 连接，需要填写 `UPSTASH_URL`（HTTPS ENDPOINT）和 `UPSTASH_TOKEN`，不是传统的 Redis 连接字符串
+> - D1 数据库用于 Cloudflare Pages 部署，详见 [Cloudflare 部署指南](./CLOUDFLARE_DEPLOYMENT.md)
 
 ### 用户注册配置
 
@@ -329,7 +331,7 @@ dockge/komodo 等 docker compose UI 也有自动更新功能
 | NEXT_PUBLIC_DOUBAN_PROXY            | 自定义豆瓣数据代理 URL   | URL prefix | 空     | custom 模式使用 |
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE | 豆瓣图片代理类型         | 见下方说明 | direct | -               |
 | NEXT_PUBLIC_DOUBAN_IMAGE_PROXY      | 自定义豆瓣图片代理 URL   | URL prefix | 空     | custom 模式使用 |
-| NEXT_PUBLIC_DISABLE_YELLOW_FILTER   | 关闭色情内容过滤         | true/false | false  | 不建议开启      |
+| NEXT_PUBLIC_DISABLE_YELLOW_FILTER   | 全局成人内容过滤开关     | true/false | false  | true=全局禁用过滤，false=全局启用过滤。**站长可在管理后台为每个用户单独配置权限** |
 | NEXT_PUBLIC_FLUID_SEARCH            | 是否开启搜索接口流式输出 | true/false | true   | -               |
 
 #### NEXT_PUBLIC_DOUBAN_PROXY_TYPE 可选值
@@ -425,11 +427,11 @@ API 地址: https://your-domain.com?adult=1
 
 ## 🎥 TVbox 配置
 
-具体可见 [TVBox 配置优化说明](https://github.com/Decohererk/DecoTV/blob/main/TVBox%E9%85%8D%E7%BD%AE%E4%BC%98%E5%8C%96%E8%AF%B4%E6%98%8E.md) ,详细功能见/admin 管理页面 **TVbox 配置**
+详细功能见 /admin 管理页面的 **TVbox 配置** 部分。
 
-## � 用户注册功能
+## 👤 用户注册功能
 
-DecoTV 支持用户自助注册功能（可选），适合需要允许用户自行创建账号的场景。
+KanTV 支持用户自助注册功能（可选），适合需要允许用户自行创建账号的场景。
 
 **功能特性**：
 
@@ -450,7 +452,7 @@ NEXT_PUBLIC_STORAGE_TYPE=redis  # 或 upstash、kvrocks
 
 > ⚠️ **安全提示**：建议默认关闭注册，仅在需要时临时开启，注册完成后立即关闭。
 
-## �🔒 安全与隐私提醒
+## 🔒 安全与隐私提醒
 
 ### 请设置密码保护并关闭公网注册
 
@@ -472,7 +474,7 @@ NEXT_PUBLIC_STORAGE_TYPE=redis  # 或 upstash、kvrocks
 
 ## 📄 License
 
-[MIT](LICENSE) © 2025 DecoTV & Contributors
+[MIT](LICENSE) © 2025 KanTV & Contributors
 
 ## 🙏 致谢
 
@@ -487,11 +489,11 @@ NEXT_PUBLIC_STORAGE_TYPE=redis  # 或 upstash、kvrocks
 ## 📈 Star History
 
 <div align="center">
-  <a href="https://star-history.com/#Decohererk/DecoTV&Date">
+  <a href="https://star-history.com/#ljhhuitailang/kantv&Date">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Decohererk/DecoTV&type=Date&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Decohererk/DecoTV&type=Date" />
-      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Decohererk/DecoTV&type=Date" />
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ljhhuitailang/kantv&type=Date&theme=dark" />
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ljhhuitailang/kantv&type=Date" />
+      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=ljhhuitailang/kantv&type=Date" />
     </picture>
   </a>
 </div>
@@ -519,6 +521,6 @@ NEXT_PUBLIC_STORAGE_TYPE=redis  # 或 upstash、kvrocks
     <strong>🌟 如果觉得项目有用，请点个 Star 支持一下！🌟</strong>
   </p>
   <p>
-    <sub>Made with ❤️ by <a href="https://github.com/Decohererk">Decohererk</a> and <a href="https://github.com/Decohererk/DecoTV/graphs/contributors">Contributors</a></sub>
+    <sub>Made with ❤️ by <a href="https://github.com/ljhhuitailang">ljhhuitailang</a> and <a href="https://github.com/ljhhuitailang/kantv/graphs/contributors">Contributors</a></sub>
   </p>
 </div>

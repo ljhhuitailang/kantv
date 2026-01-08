@@ -1,5 +1,5 @@
 # Docker Compose 配置文件
-# 用于快速部署 DecoTV
+# 用于快速部署 KanTV
 #
 # 使用方法：
 # 1. 复制 .env.example 到 .env 并配置环境变量
@@ -8,10 +8,10 @@
 version: '3.8'
 
 services:
-  # DecoTV 应用 - 使用 Kvrocks 数据库
-  decotv-kvrocks:
+  # KanTV 应用 - 使用 Kvrocks 数据库
+  kantv:
     build: .
-    container_name: decotv
+    container_name: kantv
     ports:
       - "3000:3000"
     environment:
@@ -26,7 +26,7 @@ services:
       KVROCKS_URL: redis://kvrocks:6666
 
       # 站点配置
-      NEXT_PUBLIC_SITE_NAME: ${NEXT_PUBLIC_SITE_NAME:-DecoTV}
+      NEXT_PUBLIC_SITE_NAME: ${NEXT_PUBLIC_SITE_NAME:-KanTV}
       SITE_BASE: ${SITE_BASE:-}
       ANNOUNCEMENT: ${ANNOUNCEMENT:-}
 
@@ -49,25 +49,25 @@ services:
       - kvrocks
     restart: unless-stopped
     networks:
-      - decotv-network
+      - kantv-network
 
   # Kvrocks 数据库（推荐）
   kvrocks:
     image: apache/kvrocks:latest
-    container_name: decotv-kvrocks
+    container_name: kantv-kvrocks
     ports:
       - "6666:6666"
     volumes:
       - kvrocks-data:/var/lib/kvrocks
     restart: unless-stopped
     networks:
-      - decotv-network
+      - kantv-network
 
   # 可选：Redis 数据库（如果你想使用 Redis 而不是 Kvrocks）
-  # 取消下面的注释并修改 decotv-kvrocks 服务中的 NEXT_PUBLIC_STORAGE_TYPE 和连接 URL
+  # 取消下面的注释并修改 kantv 服务中的 NEXT_PUBLIC_STORAGE_TYPE 和连接 URL
   # redis:
   #   image: redis:7-alpine
-  #   container_name: decotv-redis
+  #   container_name: kantv-redis
   #   ports:
   #     - "6379:6379"
   #   volumes:
@@ -75,7 +75,7 @@ services:
   #   command: redis-server --appendonly yes
   #   restart: unless-stopped
   #   networks:
-  #     - decotv-network
+  #     - kantv-network
 
 volumes:
   kvrocks-data:
@@ -84,5 +84,5 @@ volumes:
   #   driver: local
 
 networks:
-  decotv-network:
+  kantv-network:
     driver: bridge

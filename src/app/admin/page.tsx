@@ -1387,8 +1387,8 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                                       await refreshConfig();
                                       alert(
                                         newValue
-                                          ? `已为用户 ${user.username} 关闭成人内容过滤`
-                                          : `已为用户 ${user.username} 开启成人内容过滤（使用全局设置）`
+                                          ? `已允许用户 ${user.username} 查看成人内容（关闭过滤）`
+                                          : `已禁止用户 ${user.username} 查看成人内容（开启过滤）`
                                       );
                                     } else {
                                       const error = await response.json();
@@ -1406,8 +1406,8 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                                 }`}
                                 title={
                                   user.disableAdultFilter
-                                    ? '已关闭过滤（该用户可查看成人内容）'
-                                    : '已开启过滤（使用全局设置）'
+                                    ? '允许查看成人内容（已关闭过滤）'
+                                    : '禁止查看成人内容（已开启过滤）'
                                 }
                               >
                                 <span
@@ -1420,11 +1420,11 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                             <span
                               className={`text-xs ${
                                 user.disableAdultFilter
-                                  ? 'text-red-600 dark:text-red-400'
+                                  ? 'text-orange-600 dark:text-orange-400'
                                   : 'text-green-600 dark:text-green-400'
                               }`}
                             >
-                              {user.disableAdultFilter ? '已关闭' : '已开启'}
+                              {user.disableAdultFilter ? '可查看' : '已过滤'}
                             </span>
                           </div>
                         </td>

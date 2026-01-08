@@ -1,6 +1,6 @@
 # Cloudflare Pages + D1 部署指南
 
-本指南将帮助你将 DecoTV 部署到 Cloudflare Pages，并使用 D1 数据库存储数据。
+本指南将帮助你将 KanTV 部署到 Cloudflare Pages，并使用 D1 数据库存储数据。
 
 ## 前置要求
 
@@ -12,14 +12,14 @@
 
 ```bash
 # 创建 D1 数据库
-wrangler d1 create decotv-db
+wrangler d1 create kantv-db
 
 # 命令会返回数据库 ID，类似:
-# ✅ Successfully created DB 'decotv-db'
+# ✅ Successfully created DB 'kantv-db'
 #
 # [[d1_databases]]
 # binding = "DB"
-# database_name = "decotv-db"
+# database_name = "kantv-db"
 # database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ```
 
@@ -54,7 +54,7 @@ wrangler d1 execute decotv-db --file=./schema.sql
 - `NEXT_PUBLIC_STORAGE_TYPE`: `d1`
 
 **可选变量：**
-- `NEXT_PUBLIC_SITE_NAME`: 站点名称（默认: DecoTV）
+- `NEXT_PUBLIC_SITE_NAME`: 站点名称（默认: KanTV）
 - `NEXT_PUBLIC_ENABLE_REGISTRATION`: 是否启用用户注册（true/false）
 - `NEXT_PUBLIC_SEARCH_MAX_PAGE`: 搜索最大页数（默认: 5）
 - `NEXT_PUBLIC_DISABLE_YELLOW_FILTER`: 是否禁用成人内容过滤（true/false）
@@ -75,7 +75,7 @@ wrangler d1 execute decotv-db --file=./schema.sql
 
 5. 在 Settings > Functions 中绑定 D1 数据库：
    - Variable name: `DB`
-   - D1 database: 选择你创建的 `decotv-db`
+   - D1 database: 选择你创建的 `kantv-db`
 
 6. 点击 "Save and Deploy"
 
@@ -86,10 +86,10 @@ wrangler d1 execute decotv-db --file=./schema.sql
 pnpm build
 
 # 部署到 Cloudflare Pages
-wrangler pages deploy .next --project-name=decotv
+wrangler pages deploy .next --project-name=kantv
 
 # 绑定 D1 数据库
-wrangler pages deployment create --project-name=decotv --branch=main --binding DB=decotv-db
+wrangler pages deployment create --project-name=kantv --branch=main --binding DB=kantv-db
 ```
 
 ## 步骤 5: 配置自定义域名（可选）
