@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import { resolveAdultFilter } from '@/lib/adult-filter';
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { toSimplified } from '@/lib/chinese';
 import { getAvailableApiSites, getCacheTime, getConfig } from '@/lib/config';
@@ -39,22 +40,18 @@ export async function GET(request: NextRequest) {
   const apiSites = await getAvailableApiSites(authInfo.username);
 
   // 🔒 成人内容过滤逻辑
-  // URL 参数优先级: ?adult=1 (显示成人) > ?filter=off (显示成人) > 全局配置
-  const adultParam = searchParams.get('adult'); // OrionTV 风格参数
-  const filterParam = searchParams.get('filter'); // TVBox 风格参数
+  // 获取当前用户的成人内容过滤设置
+  const userConfig = config.UserConfig.Users.find(
+    (u) => u.username === authInfo.username,
+  );
+  const userDisableAdultFilter = userConfig?.disableAdultFilter;
 
-  let shouldFilterAdult = !config.SiteConfig.DisableYellowFilter; // 默认使用全局配置
-
-  // URL 参数覆盖全局配置
-  if (adultParam === '1' || adultParam === 'true') {
-    shouldFilterAdult = false; // 显式启用成人内容
-  } else if (adultParam === '0' || adultParam === 'false') {
-    shouldFilterAdult = true; // 显式禁用成人内容
-  } else if (filterParam === 'off' || filterParam === 'disable') {
-    shouldFilterAdult = false; // 禁用过滤 = 显示成人内容
-  } else if (filterParam === 'on' || filterParam === 'enable') {
-    shouldFilterAdult = true; // 启用过滤 = 隐藏成人内容
-  }
+  // 使用三级优先级过滤：URL 参数 > 用户设置 > 全局设置
+  const shouldFilterAdult = resolveAdultFilter(
+    searchParams,
+    config.SiteConfig.DisableYellowFilter,
+    userDisableAdultFilter,
+  );
 
   // 将搜索关键词规范化为简体中文，提升繁体用户搜索体验
   let normalizedQuery = query;

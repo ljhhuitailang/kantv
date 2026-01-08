@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import { resolveAdultFilter } from '@/lib/adult-filter';
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { toSimplified } from '@/lib/chinese';
 import { getAvailableApiSites, getConfig } from '@/lib/config';
@@ -31,6 +32,18 @@ export async function GET(request: NextRequest) {
 
   const config = await getConfig();
   const apiSites = await getAvailableApiSites(authInfo.username);
+
+  // 🔒 获取当前用户的成人内容过滤设置
+  const userConfig = config.UserConfig.Users.find(
+    (u) => u.username === authInfo.username,
+  );
+  const userDisableAdultFilter = userConfig?.disableAdultFilter;
+
+  const shouldFilterAdult = resolveAdultFilter(
+    searchParams,
+    config.SiteConfig.DisableYellowFilter,
+    userDisableAdultFilter,
+  );
 
   // 将搜索关键词规范化为简体中文
   let normalizedQuery = query;
@@ -119,9 +132,9 @@ export async function GET(request: NextRequest) {
           results.forEach((r) => uniqueMap.set(r.id, r));
           results = Array.from(uniqueMap.values());
 
-          // 成人内容过滤
+          // 成人内容过滤 - 使用三级优先级
           let filteredResults = results;
-          if (!config.SiteConfig.DisableYellowFilter) {
+          if (shouldFilterAdult) {
             filteredResults = results.filter((result) => {
               const typeName = result.type_name || '';
               // 检查源是否标记为成人资源

@@ -37,9 +37,16 @@ export async function GET(request: NextRequest) {
   const config = await getConfig();
   let apiSites = await getAvailableApiSites(authInfo.username);
 
+  // 🔒 成人内容过滤逻辑 - 使用三级优先级
+  const userConfig = config.UserConfig.Users.find(
+    (u) => u.username === authInfo.username,
+  );
+  const userDisableAdultFilter = userConfig?.disableAdultFilter;
+
   const shouldFilterAdult = resolveAdultFilter(
     searchParams,
     config.SiteConfig.DisableYellowFilter,
+    userDisableAdultFilter,
   );
 
   if (shouldFilterAdult) {

@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { AdminConfig } from '@/lib/admin.types';
+import { resolveAdultFilter } from '@/lib/adult-filter';
 import { getAuthInfoFromCookie } from '@/lib/auth';
 import { toSimplified } from '@/lib/chinese';
 import { getAvailableApiSites, getConfig } from '@/lib/config';
@@ -36,11 +37,12 @@ export async function GET(request: NextRequest) {
       console.warn('繁体转简体失败', e);
     }
 
-    // 生成建议
+    // 生成建议 (传递搜索参数用于成人内容过滤)
     const suggestions = await generateSuggestions(
       config,
       normalizedQuery,
-      authInfo.username
+      authInfo.username,
+      searchParams,
     );
 
     // 从配置中获取缓存时间，如果没有配置则使用默认值300秒（5分钟）
@@ -66,7 +68,8 @@ export async function GET(request: NextRequest) {
 async function generateSuggestions(
   config: AdminConfig,
   query: string,
-  username: string
+  username: string,
+  searchParams: URLSearchParams,
 ): Promise<
   Array<{
     text: string;
@@ -84,12 +87,22 @@ async function generateSuggestions(
     const firstSite = apiSites[0];
     const results = await searchFromApi(firstSite, query);
 
+    // 🔒 获取当前用户的成人内容过滤设置
+    const userConfig = config.UserConfig.Users.find((u) => u.username === username);
+    const userDisableAdultFilter = userConfig?.disableAdultFilter;
+
+    const shouldFilterAdult = resolveAdultFilter(
+      searchParams,
+      config.SiteConfig.DisableYellowFilter,
+      userDisableAdultFilter,
+    );
+
     realKeywords = Array.from(
       new Set(
         results
           .filter((r: any) => {
-            // 成人内容过滤
-            if (!config.SiteConfig.DisableYellowFilter) {
+            // 成人内容过滤 - 使用三级优先级
+            if (shouldFilterAdult) {
               if (firstSite.is_adult) return false;
               const typeName = r.type_name || '';
               if (yellowWords.some((word: string) => typeName.includes(word)))
