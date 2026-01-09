@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getConfig, setCachedConfig } from '@/lib/config';
 import { db } from '@/lib/db';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 // 验证码存储（简单内存存储，生产环境建议用 Redis）
 const captchaStore = new Map<

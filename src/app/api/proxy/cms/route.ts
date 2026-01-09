@@ -22,7 +22,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getConfig } from '@/lib/config';
 
 // 使用 Node.js Runtime（更好的兼容性）
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 // 禁用缓存
 export const fetchCache = 'force-no-store';
