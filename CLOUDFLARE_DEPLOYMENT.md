@@ -67,13 +67,13 @@ git push -u origin main
 
 在 "Set up builds and deployments" 页面，填写以下信息：
 
-| 配置项 | 值 | 说明 |
-|--------|-----|------|
-| **Project name** | `kantv` | 项目名称，将用于生成 URL |
-| **Production branch** | `main` | 生产环境分支 |
-| **Framework preset** | `Next.js` | 选择 Next.js 框架 |
-| **Build command** | `npm run pages:build` | Cloudflare Pages 专用构建命令 |
-| **Build output directory** | `.vercel/output/static` | 构建输出目录 |
+| 配置项                     | 值                                                       | 说明                          |
+| -------------------------- | -------------------------------------------------------- | ----------------------------- |
+| **Project name**           | `kantv`                                                  | 项目名称，将用于生成 URL      |
+| **Production branch**      | `main`                                                   | 生产环境分支                  |
+| **Framework preset**       | `Next.js`                                                | 选择 Next.js 框架             |
+| **Build command**          | `pnpm install --frozen-lockfile && pnpm run pages:build` | Cloudflare Pages 专用构建命令 |
+| **Build output directory** | `.vercel/output/static`                                  | 构建输出目录                  |
 
 #### 3.2 环境变量设置
 
@@ -81,21 +81,21 @@ git push -u origin main
 
 **必填变量**：
 
-| 变量名 | 值 | 说明 |
-|--------|-----|------|
-| `USERNAME` | `admin` | 管理员用户名 |
-| `PASSWORD` | `你的密码` | 管理员密码（建议使用复杂密码） |
-| `NEXT_PUBLIC_STORAGE_TYPE` | `d1` | 存储类型（使用 D1 数据库） |
+| 变量名                     | 值         | 说明                           |
+| -------------------------- | ---------- | ------------------------------ |
+| `USERNAME`                 | `admin`    | 管理员用户名                   |
+| `PASSWORD`                 | `你的密码` | 管理员密码（建议使用复杂密码） |
+| `NEXT_PUBLIC_STORAGE_TYPE` | `d1`       | 存储类型（使用 D1 数据库）     |
 
 **推荐添加的变量**：
 
-| 变量名 | 值 | 说明 |
-|--------|-----|------|
-| `NEXT_PUBLIC_SITE_NAME` | `KanTV` | 站点名称 |
-| `NEXT_PUBLIC_ENABLE_REGISTRATION` | `false` | 是否开放注册（默认关闭） |
-| `NEXT_PUBLIC_SEARCH_MAX_PAGE` | `5` | 搜索最大页数 |
-| `NEXT_PUBLIC_FLUID_SEARCH` | `true` | 流式搜索 |
-| `DISABLE_YELLOW_FILTER` | `false` | 成人内容过滤（false=启用过滤，true=允许成人内容） |
+| 变量名                            | 值      | 说明                                              |
+| --------------------------------- | ------- | ------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_NAME`           | `KanTV` | 站点名称                                          |
+| `NEXT_PUBLIC_ENABLE_REGISTRATION` | `false` | 是否开放注册（默认关闭）                          |
+| `NEXT_PUBLIC_SEARCH_MAX_PAGE`     | `5`     | 搜索最大页数                                      |
+| `NEXT_PUBLIC_FLUID_SEARCH`        | `true`  | 流式搜索                                          |
+| `DISABLE_YELLOW_FILTER`           | `false` | 成人内容过滤（false=启用过滤，true=允许成人内容） |
 
 > **安全提示**：设置强密码，不要公开分享你的管理员账号。
 
@@ -103,8 +103,8 @@ git push -u origin main
 
 确保使用 Node.js 20 或更高版本。如果默认版本不对，添加环境变量：
 
-| 变量名 | 值 |
-|--------|-----|
+| 变量名         | 值   |
+| -------------- | ---- |
 | `NODE_VERSION` | `20` |
 
 #### 3.4 完成初始部署
@@ -138,10 +138,10 @@ git push -u origin main
 
 添加绑定信息：
 
-| 配置项 | 值 |
-|--------|-----|
-| **Variable name** | `DB` |
-| **D1 database** | `kantv-db`（选择刚创建的数据库） |
+| 配置项            | 值                               |
+| ----------------- | -------------------------------- |
+| **Variable name** | `DB`                             |
+| **D1 database**   | `kantv-db`（选择刚创建的数据库） |
 
 7. 点击 **Save** 按钮
 
@@ -195,10 +195,12 @@ git push
 Cloudflare 会自动检测你的域名是否托管在 Cloudflare。
 
 **如果域名在 Cloudflare**：
+
 - 会自动添加 DNS 记录
 - 无需手动操作
 
 **如果域名不在 Cloudflare**：
+
 - 需要在你的域名提供商添加 CNAME 记录
 - 记录值：`kantv.pages.dev`
 
@@ -285,6 +287,7 @@ wrangler d1 export kantv-db --output=backup.sql
 **可能原因**：依赖安装失败或缺少文件
 
 **解决方法**：
+
 1. 检查 `package.json` 文件是否完整
 2. 确保 `@cloudflare/next-on-pages` 依赖已添加
 3. 确保所有必要文件都已推送到 GitHub
@@ -298,6 +301,7 @@ wrangler d1 export kantv-db --output=backup.sql
 **可能原因**：构建命令错误，未使用 Cloudflare Pages 专用构建命令
 
 **解决方法**：
+
 1. 确保 Build command 设置为 `npm run pages:build`（不是 `npm run build`）
 2. 检查 `package.json` 中是否有 `pages:build` 脚本
 3. 确保 `@cloudflare/next-on-pages` 依赖已安装
@@ -308,6 +312,7 @@ wrangler d1 export kantv-db --output=backup.sql
 **可能原因**：D1 数据库未正确绑定
 
 **解决方法**：
+
 1. 检查 Settings > Functions > D1 database bindings
 2. 确保 Variable name 是 `DB`（大写）
 3. 确保选择了正确的数据库 `kantv-db`
@@ -318,6 +323,7 @@ wrangler d1 export kantv-db --output=backup.sql
 **可能原因**：环境变量未设置或设置错误
 
 **解决方法**：
+
 1. 检查 Settings > Environment variables
 2. 确保 `NEXT_PUBLIC_STORAGE_TYPE=d1` 已设置
 3. 确保 `USERNAME` 和 `PASSWORD` 已设置
@@ -328,6 +334,7 @@ wrangler d1 export kantv-db --output=backup.sql
 **可能原因**：环境变量设置问题
 
 **解决方法**：
+
 1. 通过环境变量 `DISABLE_YELLOW_FILTER` 设置全局默认行为（部署时设置）
 2. 登录管理后台 > 站点设置，可以随时修改全局设置（无需重建）
 3. 在管理后台 > 用户管理，可以为每个用户单独配置过滤权限
@@ -338,6 +345,7 @@ wrangler d1 export kantv-db --output=backup.sql
 **错误信息**：`Exited with error code: 254`
 
 **解决方法**：
+
 - **不要使用 CLI 部署**，改用本指南推荐的网页端部署方式
 - Cloudflare Pages 的 Git 集成部署更稳定
 - 如果必须使用 CLI，尝试使用 npm 而不是 pnpm
@@ -422,5 +430,22 @@ const optimizedUrl = `${imageUrl}?width=800&format=auto`;
 
 ---
 
-**最后更新**：2026-01-08
-**适用版本**：KanTV v1.2.0+
+**最后更新**：2026-01-09
+**适用版本**：KanTV v1.3.0+
+
+## ✨ v1.3.0 更新说明
+
+### 关键修复
+
+- ✅ 添加 `compatibility_flags = ["nodejs_compat"]` 到 wrangler.toml（**关键**）
+- ✅ 修复 next.config.js 输出模式为 `standalone`
+- ✅ 优化 D1 数据库自动初始化逻辑
+- ✅ 更新构建命令，确保依赖正确安装
+
+### 重要提示
+
+如果你之前的部署失败，可能是因为缺少 `nodejs_compat` 兼容性标志。请确保：
+
+1. wrangler.toml 中包含 `compatibility_flags = ["nodejs_compat"]`
+2. 使用完整的构建命令：`pnpm install --frozen-lockfile && pnpm run pages:build`
+3. D1 数据库绑定的变量名为 `DB`（大写）
