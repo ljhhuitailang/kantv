@@ -6,7 +6,7 @@ import { getAuthInfoFromCookie } from '@/lib/auth';
 import { getConfig } from '@/lib/config';
 import { CURRENT_VERSION } from '@/lib/version';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 // 根路径 API - 为 OrionTV 提供服务器信息和健康检查
 // 支持成人内容模式检测
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
         'Access-Control-Allow-Headers': 'Content-Type, Cookie',
         'X-Adult-Filter': adultFilterEnabled ? 'enabled' : 'disabled',
       },
-    }
+    },
   );
 }
 

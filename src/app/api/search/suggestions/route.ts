@@ -10,7 +10,7 @@ import { getAvailableApiSites, getConfig } from '@/lib/config';
 import { searchFromApi } from '@/lib/downstream';
 import { yellowWords } from '@/lib/yellow';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic'; // 强制动态渲染，避免构建时静态生成报错
 
 export async function GET(request: NextRequest) {
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
           'Vercel-CDN-Cache-Control': `public, s-maxage=${cacheTime}`,
           'Netlify-Vary': 'query',
         },
-      }
+      },
     );
   } catch (error) {
     console.error('获取搜索建议失败', error);
@@ -88,7 +88,9 @@ async function generateSuggestions(
     const results = await searchFromApi(firstSite, query);
 
     // 🔒 获取当前用户的成人内容过滤设置
-    const userConfig = config.UserConfig.Users.find((u) => u.username === username);
+    const userConfig = config.UserConfig.Users.find(
+      (u) => u.username === username,
+    );
     const userDisableAdultFilter = userConfig?.disableAdultFilter;
 
     const shouldFilterAdult = resolveAdultFilter(
@@ -114,9 +116,9 @@ async function generateSuggestions(
           .filter(Boolean)
           .flatMap((title: string) => title.split(/[ -:：·、-]/))
           .filter(
-            (w: string) => w.length > 1 && w.toLowerCase().includes(queryLower)
-          )
-      )
+            (w: string) => w.length > 1 && w.toLowerCase().includes(queryLower),
+          ),
+      ),
     ).slice(0, 8);
   }
 

@@ -10,7 +10,7 @@ import { searchFromApi } from '@/lib/downstream';
 import { rankSearchResults } from '@/lib/search-ranking';
 import { yellowWords } from '@/lib/yellow';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const authInfo = getAuthInfoFromCookie(request);
@@ -116,13 +116,13 @@ export async function GET(request: NextRequest) {
               new Promise((_, reject) =>
                 setTimeout(
                   () => reject(new Error(`${site.name} timeout`)),
-                  20000
-                )
+                  20000,
+                ),
               ),
             ]).catch((err) => {
               console.warn(`搜索失败 ${site.name} (query: ${q}):`, err.message);
               return [];
-            })
+            }),
           );
 
           const resultsArrays = await Promise.all(siteResultsPromises);
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
               }
               // 检查分类名称关键词
               return !yellowWords.some((word: string) =>
-                typeName.includes(word)
+                typeName.includes(word),
               );
             });
           }

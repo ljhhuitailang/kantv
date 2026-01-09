@@ -16,6 +16,7 @@ import TopNavbar from '../components/TopNavbar';
 
 const inter = Inter({ subsets: ['latin'] });
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 // 动态生成 metadata，支持配置更新后的标题变化
 export async function generateMetadata(): Promise<Metadata> {

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getConfig, setCachedConfig } from '@/lib/config';
 import { db } from '@/lib/db';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 // 验证码存储（简单内存存储，生产环境建议用 Redis）
 const captchaStore = new Map<
@@ -159,7 +159,7 @@ export async function GET(req: NextRequest) {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-store, no-cache, must-revalidate',
           },
-        }
+        },
       );
     }
 
@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
     if (storageType === 'localstorage') {
       return NextResponse.json(
         { error: '当前存储模式不支持用户注册，请使用 Redis/Upstash/Kvrocks' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -202,7 +202,7 @@ export async function POST(req: NextRequest) {
     if (!captchaData) {
       return NextResponse.json(
         { error: '验证码已过期，请刷新' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -211,7 +211,7 @@ export async function POST(req: NextRequest) {
       captchaStore.delete(sessionId);
       return NextResponse.json(
         { error: '验证码错误次数过多，请重新获取' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
       captchaData.attempts += 1;
       return NextResponse.json(
         { error: '验证码错误，请重试' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -258,7 +258,7 @@ export async function POST(req: NextRequest) {
 
     // 检查是否已在配置中（理论上不应该存在）
     const existsInConfig = config.UserConfig.Users.some(
-      (u) => u.username === username
+      (u) => u.username === username,
     );
 
     if (!existsInConfig) {
@@ -291,7 +291,7 @@ export async function POST(req: NextRequest) {
       {
         error: error instanceof Error ? error.message : '注册失败，请稍后重试',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
